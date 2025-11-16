@@ -16,3 +16,4 @@ urlpatterns += [
     path('member-view/', member_view, name='member_view'),
 ]
 
+
