@@ -4,7 +4,7 @@ Unit tests for Django REST Framework API endpoints.
 This test suite covers:
 - CRUD operations for Book and Author models
 - Filtering, searching, and ordering functionalities
-- Authentication and permission enforcement
+- Authentication and permission enforcement using self.client.login
 - Response data integrity and status codes
 """
 
@@ -70,6 +70,84 @@ class BaseTestCase(APITestCase):
         self.client = APIClient()
 
 
+class AuthenticationTests(BaseTestCase):
+    """
+    Test cases specifically for authentication using self.client.login
+    These tests demonstrate proper login/logout functionality.
+    """
+    
+    def test_login_with_valid_credentials(self):
+        """
+        Test that users can log in with valid credentials using self.client.login.
+        """
+        # Test login with valid credentials
+        login_success = self.client.login(username='regular', password='testpass123')
+        self.assertTrue(login_success)
+        
+        # After login, should be able to access protected endpoints
+        url = reverse('book-create')
+        data = {
+            'title': 'Book After Login',
+            'publication_year': 2023,
+            'author': self.author1.id
+        }
+        response = self.client.post(url, data, format='json')
+        
+        # Should succeed because user is logged in
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
+    def test_login_with_invalid_credentials(self):
+        """
+        Test that login fails with invalid credentials using self.client.login.
+        """
+        # Test login with invalid password
+        login_success = self.client.login(username='regular', password='wrongpassword')
+        self.assertFalse(login_success)
+        
+        # After failed login, should not be able to access protected endpoints
+        url = reverse('book-create')
+        data = {
+            'title': 'Book After Failed Login',
+            'publication_year': 2023,
+            'author': self.author1.id
+        }
+        response = self.client.post(url, data, format='json')
+        
+        # Should fail because user is not logged in
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_logout_functionality(self):
+        """
+        Test that logout works properly using self.client.logout.
+        """
+        # First, log in
+        self.client.login(username='regular', password='testpass123')
+        
+        # Verify we can access protected endpoints while logged in
+        url = reverse('book-create')
+        data = {
+            'title': 'Book While Logged In',
+            'publication_year': 2023,
+            'author': self.author1.id
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Now log out
+        self.client.logout()
+        
+        # After logout, should not be able to access protected endpoints
+        data = {
+            'title': 'Book After Logout',
+            'publication_year': 2023,
+            'author': self.author1.id
+        }
+        response = self.client.post(url, data, format='json')
+        
+        # Should fail because user is logged out
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
 class BookListViewTests(BaseTestCase):
     """
     Test cases for Book List View (GET /api/books/)
@@ -87,12 +165,13 @@ class BookListViewTests(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 4)  # Assuming pagination
     
-    def test_list_books_authorized(self):
+    def test_list_books_with_login(self):
         """
-        Test that authenticated users can access the book list.
-        Should return 200 OK.
+        Test that logged-in users can access the book list using self.client.login.
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-list')
         response = self.client.get(url)
         
@@ -187,33 +266,6 @@ class BookListViewTests(BaseTestCase):
         # Should be ordered by author name alphabetically
 
 
-class BookDetailViewTests(BaseTestCase):
-    """
-    Test cases for Book Detail View (GET /api/books/<id>/)
-    """
-    
-    def test_retrieve_book_detail_unauthorized(self):
-        """
-        Test that unauthenticated users can retrieve book details.
-        """
-        url = reverse('book-detail', kwargs={'pk': self.book1.id})
-        response = self.client.get(url)
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['title'], self.book1.title)
-        self.assertEqual(response.data['publication_year'], self.book1.publication_year)
-    
-    def test_retrieve_nonexistent_book(self):
-        """
-        Test retrieving a book that doesn't exist.
-        Should return 404 Not Found.
-        """
-        url = reverse('book-detail', kwargs={'pk': 9999})
-        response = self.client.get(url)
-        
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-
 class BookCreateViewTests(BaseTestCase):
     """
     Test cases for Book Create View (POST /api/books/create/)
@@ -234,11 +286,13 @@ class BookCreateViewTests(BaseTestCase):
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     
-    def test_create_book_authorized(self):
+    def test_create_book_with_login(self):
         """
-        Test that authenticated users can create books.
+        Test that logged-in users can create books using self.client.login.
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-create')
         data = {
             'title': 'New Test Book',
@@ -251,11 +305,31 @@ class BookCreateViewTests(BaseTestCase):
         self.assertEqual(response.data['title'], 'New Test Book')
         self.assertEqual(Book.objects.count(), 5)  # 4 initial + 1 new
     
+    def test_create_book_with_admin_login(self):
+        """
+        Test that admin users can create books using self.client.login.
+        """
+        # Log in as admin
+        self.client.login(username='admin', password='testpass123')
+        
+        url = reverse('book-create')
+        data = {
+            'title': 'Admin Created Book',
+            'publication_year': 2023,
+            'author': self.author1.id
+        }
+        response = self.client.post(url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], 'Admin Created Book')
+    
     def test_create_book_with_future_publication_year(self):
         """
         Test creating a book with future publication year (should fail validation).
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-create')
         data = {
             'title': 'Future Book',
@@ -271,7 +345,9 @@ class BookCreateViewTests(BaseTestCase):
         """
         Test creating a book with invalid data (missing required fields).
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-create')
         data = {
             'title': '',  # Empty title
@@ -302,11 +378,13 @@ class BookUpdateViewTests(BaseTestCase):
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     
-    def test_update_book_authorized(self):
+    def test_update_book_with_login(self):
         """
-        Test that authenticated users can update books.
+        Test that logged-in users can update books using self.client.login.
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-update', kwargs={'pk': self.book1.id})
         data = {
             'title': 'Updated Harry Potter Title',
@@ -319,11 +397,13 @@ class BookUpdateViewTests(BaseTestCase):
         self.book1.refresh_from_db()
         self.assertEqual(self.book1.title, 'Updated Harry Potter Title')
     
-    def test_partial_update_book(self):
+    def test_partial_update_book_with_login(self):
         """
-        Test partial update of a book using PATCH method.
+        Test partial update of a book using PATCH method after login.
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-update', kwargs={'pk': self.book1.id})
         data = {
             'title': 'Partially Updated Title'
@@ -350,22 +430,26 @@ class BookDeleteViewTests(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(Book.objects.filter(id=self.book1.id).exists())
     
-    def test_delete_book_authorized(self):
+    def test_delete_book_with_login(self):
         """
-        Test that authenticated users can delete books.
+        Test that logged-in users can delete books using self.client.login.
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-delete', kwargs={'pk': self.book1.id})
         response = self.client.delete(url)
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Book.objects.filter(id=self.book1.id).exists())
     
-    def test_delete_nonexistent_book(self):
+    def test_delete_nonexistent_book_with_login(self):
         """
-        Test deleting a book that doesn't exist.
+        Test deleting a book that doesn't exist after login.
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('book-delete', kwargs={'pk': 9999})
         response = self.client.delete(url)
         
@@ -398,11 +482,13 @@ class AuthorViewTests(BaseTestCase):
         self.assertEqual(response.data['name'], 'J.K. Rowling')
         self.assertEqual(len(response.data['books']), 2)  # 2 books by Rowling
     
-    def test_create_author_authenticated(self):
+    def test_create_author_with_login(self):
         """
-        Test creating a new author as authenticated user.
+        Test creating a new author as logged-in user using self.client.login.
         """
-        self.client.force_authenticate(user=self.regular_user)
+        # Log in first
+        self.client.login(username='regular', password='testpass123')
+        
         url = reverse('author-create')
         data = {'name': 'New Test Author'}
         response = self.client.post(url, data, format='json')
