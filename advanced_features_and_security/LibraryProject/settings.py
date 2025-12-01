@@ -9,10 +9,12 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-SECRET_KEY = 'django-insecure-replaced-for-dev'
-DEBUG = True
-ALLOWED_HOSTS = []
+# Quick-start development settings - change DEBUG to False in production
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-replaced-for-dev')
+# WARNING: Set DEBUG=False in production. For local development you can
+# override this by setting the DJANGO_DEBUG environment variable to '1'.
+DEBUG = os.environ.get('DJANGO_DEBUG', '') != '' and True or False
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if os.environ.get('DJANGO_ALLOWED_HOSTS') else []
 
 
 # Application definition
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'LibraryProject.security.ContentSecurityPolicyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -101,3 +104,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Use the custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Security settings
+# These settings help protect against common web attacks. Adjust for your
+# deployment environment (they are enabled for production by default here).
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+# Ensure cookies are only sent over HTTPS in production
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# HTTP Strict Transport Security (HSTS) — enable when serving over HTTPS
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+
+# Content Security Policy: default shown via middleware

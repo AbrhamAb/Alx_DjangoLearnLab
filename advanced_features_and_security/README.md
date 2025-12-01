@@ -32,3 +32,20 @@ python .\manage.py setup_groups
 	- `Admins`: `can_view`, `can_create`, `can_edit`, `can_delete`
 
 - Example views in `LibraryProject/bookshelf/views.py` are protected with `@permission_required('bookshelf.can_edit', raise_exception=True)` etc. You can test by creating users, assigning them to groups via admin, and attempting the create/edit/delete views.
+ 
+Security Best Practices Implemented:
+
+- CSRF protection: all form templates include `{% csrf_token %}` and views use Django forms for input validation.
+- Secure settings: `SECURE_BROWSER_XSS_FILTER`, `X_FRAME_OPTIONS`, `SECURE_CONTENT_TYPE_NOSNIFF`, `CSRF_COOKIE_SECURE`, and `SESSION_COOKIE_SECURE` are set in `LibraryProject/settings.py`.
+- Content Security Policy (CSP): a simple middleware `LibraryProject/security.py` adds a conservative `Content-Security-Policy` header. For production consider `django-csp`.
+- Input validation: `bookshelf/forms.py` provides `BookForm` using Django's `ModelForm` to validate user input and avoid raw SQL or string interpolation.
+
+To test security settings locally (development):
+
+```powershell
+# For local development set the DJANGO_DEBUG env var to allow DEBUG behavior
+setx DJANGO_DEBUG 1; # restart shell/session for effect
+python .\manage.py runserver
+```
+
+Note: `CSRF_COOKIE_SECURE` and `SESSION_COOKIE_SECURE` expect HTTPS in production. For local testing you may need to adjust or use a development proxy that supports HTTPS.
