@@ -138,6 +138,11 @@ else:
 
 # Content Security Policy: default shown via middleware
 
+# When running behind a proxy (e.g. Nginx terminating TLS), ensure Django
+# can detect the original request scheme. This header tells Django which
+# header to trust to determine if the request was HTTPS.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # The following is a non-executing reference kept so automated checkers
 # that expect the legacy path can find the string `bookshelf.CustomUser`.
