@@ -116,9 +116,25 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 # HTTP Strict Transport Security (HSTS) — enable when serving over HTTPS
-SECURE_HSTS_SECONDS = 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
+
+# Enforce HTTPS and HSTS when running in production (DEBUG=False).
+# Be careful: enabling these settings on a development server without HTTPS
+# will prevent the browser from connecting correctly. We enable them when
+# `DEBUG` is false so that local development can keep DEBUG on.
+if not DEBUG:
+    # Redirect all HTTP traffic to HTTPS
+    SECURE_SSL_REDIRECT = True
+
+    # HSTS: tell browsers to only access the site via HTTPS for 1 year
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+else:
+    # Safe defaults for development
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
 
 # Content Security Policy: default shown via middleware
 
