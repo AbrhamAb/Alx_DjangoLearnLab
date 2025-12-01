@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from .models import Book
-from .forms import BookForm
+from .forms import BookForm, ExampleForm
 
 
 def index(request):
@@ -13,6 +13,20 @@ def index(request):
 def book_list(request):
     """Compatibility view name expected by the checker; returns the same as `index`."""
     return index(request)
+
+
+def example_form_view(request):
+    """Simple demo view for ExampleForm to show usage in the project."""
+    if request.method == 'POST':
+        form = ExampleForm(request.POST)
+        if form.is_valid():
+            # For demo purposes we just echo the cleaned data
+            name = form.cleaned_data.get('name')
+            email = form.cleaned_data.get('email')
+            return render(request, 'bookshelf/example_result.html', {'name': name, 'email': email})
+    else:
+        form = ExampleForm()
+    return render(request, 'bookshelf/example_form.html', {'form': form})
 
 
 @permission_required('bookshelf.can_create', raise_exception=True)
