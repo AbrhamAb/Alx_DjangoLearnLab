@@ -1,0 +1,18 @@
+{% extends 'blog/base.html' %}
+{% block title %}Profile - Django Blog{% endblock %}
+{% block content %}
+<h2>Your Profile</h2>
+<form method="post">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+        <div>{{ field.errors|striptags }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit">Save</button>
+</form>
+{% endblock %}

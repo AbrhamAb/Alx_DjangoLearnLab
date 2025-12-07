@@ -1,0 +1,22 @@
+{% extends 'blog/base.html' %}
+{% block title %}Login - Django Blog{% endblock %}
+{% block content %}
+<h2>Login</h2>
+{% if form.non_field_errors %}
+  <div>{{ form.non_field_errors }}</div>
+{% endif %}
+<form method="post">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+        <div>{{ field.errors|striptags }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit">Login</button>
+</form>
+<p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+{% endblock %}
