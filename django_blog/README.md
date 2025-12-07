@@ -34,11 +34,18 @@ This project is a starter Django blog with authentication (login, logout, regist
 
 ## Models
 - `Post` with `title`, `content`, `published_date` (`auto_now_add`), and `author` (`User` FK).
+- `Comment` with `post`, `author`, `content`, `created_at`, `updated_at`.
 
 ## Forms
 - `RegistrationForm` (extends `UserCreationForm`, adds required email).
 - `ProfileForm` (edits username, email, first/last name).
 - `PostForm` (ModelForm for `Post` title and content; author set in view).
+- `CommentForm` (ModelForm for `Comment` content; post/author set in view).
 
 ## URLs
 - Root includes `blog.urls`; names: `home`, `posts`, `post_detail`, `post_create`, `post_update`, `post_delete`, plus `login`, `logout`, `register`, `profile`.
+- Comment URLs: `comment_create` (`/posts/<pk>/comments/new/`), `comment_update` (`/comments/<pk>/update/`), `comment_delete` (`/comments/<pk>/delete/`).
+
+## Comments
+- Post detail page shows comments and provides an add-comment form for authenticated users.
+- Only the comment author can edit or delete their comment.
