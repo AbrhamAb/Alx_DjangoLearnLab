@@ -29,19 +29,19 @@ class PostListView(ListView):
     ordering = ['-published_date']
 
 
-class TagPostListView(ListView):
+class PostByTagListView(ListView):
     model = Post
     template_name = 'blog/tag_post_list.html'
     context_object_name = 'posts'
     ordering = ['-published_date']
 
     def get_queryset(self):
-        tag_name = self.kwargs.get('tag_name')
-        return Post.objects.filter(tags__name=tag_name).order_by('-published_date').distinct()
+        tag_slug = self.kwargs.get('tag_slug')
+        return Post.objects.filter(tags__name=tag_slug).order_by('-published_date').distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tag_name'] = self.kwargs.get('tag_name')
+        context['tag_name'] = self.kwargs.get('tag_slug')
         return context
 
 
