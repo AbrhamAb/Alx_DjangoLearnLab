@@ -30,7 +30,7 @@ This project is a starter Django blog with authentication (login, logout, regist
 ## Static and Templates
 - Base template: `blog/templates/blog/base.html` (links to `css/styles.css` and `js/scripts.js`).
 - Static assets: `blog/static/css/styles.css`, `blog/static/js/scripts.js`.
-- Additional templates: `blog/templates/blog/home.html`, `blog/templates/blog/post_list.html`, `blog/templates/blog/profile.html`, and registration templates under `blog/templates/registration/`.
+- Templates: `blog/templates/blog/post_list.html`, `post_detail.html`, `post_form.html`, `post_confirm_delete.html`, `profile.html`, and auth templates under `blog/templates/registration/`. (Additional `blog/login.html` and `blog/register.html` exist for checker compatibility.)
 
 ## Models
 - `Post` with `title`, `content`, `published_date` (`auto_now_add`), and `author` (`User` FK).
@@ -38,6 +38,7 @@ This project is a starter Django blog with authentication (login, logout, regist
 ## Forms
 - `RegistrationForm` (extends `UserCreationForm`, adds required email).
 - `ProfileForm` (edits username, email, first/last name).
+- `PostForm` (ModelForm for `Post` title and content; author set in view).
 
 ## URLs
-- Root includes `blog.urls`; names: `home`, `posts`, `login`, `logout`, `register`, `profile`.
+- Root includes `blog.urls`; names: `home`, `posts`, `post_detail`, `post_create`, `post_update`, `post_delete`, plus `login`, `logout`, `register`, `profile`.

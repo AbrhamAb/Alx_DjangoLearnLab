@@ -2,12 +2,15 @@
 {% block title %}Posts - Django Blog{% endblock %}
 {% block content %}
 <h2>Blog Posts</h2>
+{% if user.is_authenticated %}
+  <p><a href="{% url 'post_create' %}">Create new post</a></p>
+{% endif %}
 {% if posts %}
   <ul>
     {% for post in posts %}
       <li>
-        <strong>{{ post.title }}</strong> by {{ post.author }} — {{ post.published_date }}
-        <p>{{ post.content }}</p>
+        <strong><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></strong> by {{ post.author }} — {{ post.published_date }}
+        <p>{{ post.content|truncatewords:30 }}</p>
       </li>
     {% endfor %}
   </ul>
