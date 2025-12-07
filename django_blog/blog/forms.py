@@ -23,18 +23,20 @@ class PostForm(forms.ModelForm):
     tags = forms.CharField(
         required=False,
         help_text="Comma-separated tags",
-        widget=TagWidget(attrs={"placeholder": "e.g. django, python"}),
+        widget=TagWidget(),
     )
 
     class Meta:
         model = Post
         fields = ["title", "content", "tags"]
         widgets = {
-            "tags": TagWidget(attrs={"placeholder": "e.g. django, python"}),
+            "tags": TagWidget(),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["tags"].widget.attrs.setdefault(
+            "placeholder", "e.g. django, python")
         if self.instance.pk:
             existing = self.instance.tags.values_list("name", flat=True)
             self.fields["tags"].initial = ", ".join(existing)
