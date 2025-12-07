@@ -28,3 +28,10 @@ python manage.py runserver
 
 ## Next steps
 - Add authentication (signup/login), CRUD views for posts, comments, tagging, and search as the project grows.
+
+## Authentication
+- Login: `/login/`
+- Logout: `/logout/`
+- Register: `/register/`
+- Profile: `/profile/` (requires login)
+- Settings include `LOGIN_REDIRECT_URL` and `LOGOUT_REDIRECT_URL` pointing to the post list.
