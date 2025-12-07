@@ -11,6 +11,13 @@
   <header>
     <h1><a href="/">Django Blog</a></h1>
   </header>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <main>
     {% block content %}{% endblock %}
   </main>

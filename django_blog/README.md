@@ -35,3 +35,7 @@ python manage.py runserver
 - Register: `/register/`
 - Profile: `/profile/` (requires login)
 - Settings include `LOGIN_REDIRECT_URL` and `LOGOUT_REDIRECT_URL` pointing to the post list.
+- Templates live under `templates/registration/` and `templates/blog/profile.html`.
+- Static assets: CSS at `static/css/main.css`; JS placeholders at `static/js/login.js` and `static/js/register.js`.
+- Forms use CSRF tokens; messages are rendered via the base template to show success/error feedback.
+- After registering, you are redirected to login; profile updates show a success message.
