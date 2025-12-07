@@ -1,10 +1,9 @@
 {% extends 'blog/base.html' %}
-{% block title %}Posts - Django Blog{% endblock %}
+{% block title %}Search Results - Django Blog{% endblock %}
 {% block content %}
-<h2>Blog Posts</h2>
-{% if user.is_authenticated %}
-  <p><a href="{% url 'post_create' %}">Create new post</a></p>
-{% endif %}
+<h2>Search Results</h2>
+<p>Showing results for "{{ query }}"</p>
+<p><a href="{% url 'posts' %}">Back to all posts</a></p>
 {% if posts %}
   <ul>
     {% for post in posts %}
@@ -22,6 +21,6 @@
     {% endfor %}
   </ul>
 {% else %}
-  <p>No posts yet.</p>
+  <p>No posts matched your search.</p>
 {% endif %}
 {% endblock %}
