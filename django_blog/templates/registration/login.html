@@ -1,11 +1,23 @@
 {% extends 'blog/base.html' %}
 {% load static %}
+{% block title %}Login - Django Blog{% endblock %}
 {% block content %}
 <h2>Login</h2>
-<form method="post" id="login-form">
+{% if form.non_field_errors %}
+  <div class="form-errors">{{ form.non_field_errors }}</div>
+{% endif %}
+<form method="post" id="login-form" class="auth-form">
   {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Login</button>
+  {% for field in form %}
+    <div class="form-row">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+        <div class="field-errors">{{ field.errors|striptags }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn">Login</button>
 </form>
 <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
 {% endblock %}

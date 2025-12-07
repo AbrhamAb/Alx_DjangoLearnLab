@@ -1,11 +1,26 @@
 {% extends 'blog/base.html' %}
 {% load static %}
+{% block title %}Register - Django Blog{% endblock %}
 {% block content %}
 <h2>Register</h2>
-<form method="post" id="register-form">
+{% if form.non_field_errors %}
+  <div class="form-errors">{{ form.non_field_errors }}</div>
+{% endif %}
+<form method="post" id="register-form" class="auth-form">
   {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Create account</button>
+  {% for field in form %}
+    <div class="form-row">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}
+        <small class="help-text">{{ field.help_text }}</small>
+      {% endif %}
+      {% if field.errors %}
+        <div class="field-errors">{{ field.errors|striptags }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn">Create account</button>
 </form>
 <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
 {% endblock %}

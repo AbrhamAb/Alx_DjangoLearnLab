@@ -20,3 +20,58 @@ li {
 h3 {
     margin: 0 0 0.25rem 0;
 }
+
+.auth-form {
+    max-width: 480px;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+
+.form-row label {
+    font-weight: 600;
+}
+
+.auth-form input {
+    padding: 0.55rem 0.65rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.1rem;
+    background: #2b7cff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #1d63d1;
+}
+
+.form-errors,
+.field-errors,
+.messages li.error,
+.messages li.warning {
+    color: #b00020;
+}
+
+.messages li.success {
+    color: #0b7a0b;
+}
+
+.help-text {
+    color: #555;
+    font-size: 0.9rem;
+}
