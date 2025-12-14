@@ -34,8 +34,7 @@ class LikePostView(APIView):
 
     def post(self, request, pk):
         post = generics.get_object_or_404(Post, pk=pk)
-        like, created = Like.objects.get_or_create(
-            user=request.user, post=post)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
         if created and post.author != request.user:
             Notification.objects.create(
                 recipient=post.author,
