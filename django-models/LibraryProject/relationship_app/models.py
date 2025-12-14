@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 class Author(models.Model):
     name = models.CharField(max_length=100)
 
@@ -14,7 +15,7 @@ class Author(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=255)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    
+
     # Optional: add publication year if you used it in templates
     publication_year = models.IntegerField(null=True, blank=True)
 
@@ -43,7 +44,7 @@ class Librarian(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class UserProfile(models.Model):
     ROLE_CHOICES = (
