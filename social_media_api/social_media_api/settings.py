@@ -91,6 +91,17 @@ DATABASES = {
     }
 }
 
+# Optional production database configuration via environment
+if os.environ.get('DB_ENGINE'):
+    DATABASES['default'] = {
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.environ.get('DB_NAME', ''),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', ''),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+    }
+
 AUTH_USER_MODEL = 'accounts.User'
 
 REST_FRAMEWORK = {
