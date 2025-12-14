@@ -1,8 +1,9 @@
-from django.shortcuts import get_object_or_404
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import permissions, viewsets, filters, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from notifications.models import Notification
 from notifications.utils import create_notification
 
 from .models import Comment, Like, Post
@@ -32,12 +33,17 @@ class LikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(
-            post=post, user=request.user)
+            user=request.user, post=post)
         if created and post.author != request.user:
-            create_notification(
-                recipient=post.author, actor=request.user, verb='liked your post', target=post)
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                content_type=ContentType.objects.get_for_model(Post),
+                object_id=post.pk,
+            )
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response({'detail': 'Liked'}, status=status_code)
 
@@ -46,7 +52,7 @@ class UnlikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         like = Like.objects.filter(post=post, user=request.user).first()
         if like:
             like.delete()
