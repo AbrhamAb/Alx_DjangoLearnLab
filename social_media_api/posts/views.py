@@ -1,6 +1,11 @@
-from rest_framework import permissions, viewsets, filters, generics
+from django.shortcuts import get_object_or_404
+from rest_framework import permissions, viewsets, filters, generics, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import Comment, Post
+from notifications.utils import create_notification
+
+from .models import Comment, Like, Post
 from .serializers import CommentSerializer, PostSerializer
 
 
@@ -21,6 +26,31 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class LikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(
+            post=post, user=request.user)
+        if created and post.author != request.user:
+            create_notification(
+                recipient=post.author, actor=request.user, verb='liked your post', target=post)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response({'detail': 'Liked'}, status=status_code)
+
+
+class UnlikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like = Like.objects.filter(post=post, user=request.user).first()
+        if like:
+            like.delete()
+        return Response({'detail': 'Unliked'}, status=status.HTTP_200_OK)
 
 
 class FeedView(generics.ListAPIView):
@@ -48,4 +78,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        comment = serializer.save(author=self.request.user)
+        post = comment.post
+        if post.author != self.request.user:
+            create_notification(recipient=post.author, actor=self.request.user,
+                                verb='commented on your post', target=post)

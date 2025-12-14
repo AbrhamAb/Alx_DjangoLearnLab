@@ -1,17 +1,20 @@
 # Social Media API
 
-A starter Django REST API for social media-style user accounts. It includes a custom user model with bio, profile pictures, follower relationships, token-based authentication, and CRUD APIs for posts and comments.
+A starter Django REST API for social media-style user accounts. It includes a custom user model with bio, profile pictures, follower relationships, token-based authentication, CRUD APIs for posts and comments, likes, and notifications.
 
 ## Features
 - Custom `User` model extending `AbstractUser` with `bio`, `profile_picture`, and self-referential `followers`/`following` relationship.
 - Token authentication via `rest_framework.authtoken` (tokens issued on register/login and retrievable via `/api/accounts/token/`).
 - CRUD for posts and comments with author-only edits, pagination, and search/order support on posts.
+- Likes on posts with per-user like state and counts.
+- Notifications for follows, likes, and comments.
 - SQLite by default; configurable via Django settings.
 
 ## Project Structure
 - `social_media_api/` – Django project settings and URLs.
 - `accounts/` – app containing the custom user model, serializers, and auth views.
 - `posts/` – posts and comments models, serializers, viewsets, and routing.
+- `notifications/` – notifications model, serializer, view, and routing.
 
 ## Setup
 1. (Optional) Create and activate a virtual environment.
@@ -57,6 +60,8 @@ Content base path: `/api/`
 - `GET /posts/{id}/` – Retrieve a post.
 - `PUT/PATCH /posts/{id}/` – Update a post (author only).
 - `DELETE /posts/{id}/` – Delete a post (author only).
+- `POST /posts/{id}/like/` – Like a post (idempotent if already liked).
+- `POST /posts/{id}/unlike/` – Remove a like from a post.
 
 - `GET /comments/` – List comments (paginated). Filter by `?post=<post_id>`.
 - `POST /comments/` – Create a comment (auth required). `post`, `content`.
@@ -64,6 +69,9 @@ Content base path: `/api/`
 - `PUT/PATCH /comments/{id}/` – Update a comment (author only).
 - `DELETE /comments/{id}/` – Delete a comment (author only).
 - `GET /feed/` – Posts by users the caller follows, newest first.
+
+Notifications base path: `/api/notifications/`
+- `GET /` – List notifications for the authenticated user (unread first, newest first). Notifications are generated for new followers, likes on your posts, and comments on your posts.
 
 Include the token in requests that require authentication:
 ```

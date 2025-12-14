@@ -10,6 +10,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from notifications.utils import create_notification
+
 from .models import User
 
 CustomUser = User
@@ -85,6 +87,8 @@ class FollowUserView(generics.GenericAPIView):
         if target == request.user:
             return Response({'detail': 'Cannot follow yourself.'}, status=status.HTTP_400_BAD_REQUEST)
         request.user.following.add(target)
+        create_notification(recipient=target, actor=request.user,
+                            verb='started following you', target=request.user)
         return Response({'detail': f'Now following {target.username}.'}, status=status.HTTP_200_OK)
 
 
