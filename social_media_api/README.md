@@ -47,6 +47,8 @@ Authentication base path: `/api/accounts/`
 - `GET /profile/` – Return the authenticated user's profile.
 - `PUT/PATCH /profile/` – Update email, bio, or profile picture.
 - `GET /token/` – Return (or create) the calling user's token.
+- `POST /follow/<user_id>/` – Follow another user (self-follow blocked).
+- `POST /unfollow/<user_id>/` – Unfollow a user (self-unfollow blocked).
 
 Content base path: `/api/`
 
@@ -61,6 +63,7 @@ Content base path: `/api/`
 - `GET /comments/{id}/` – Retrieve a comment.
 - `PUT/PATCH /comments/{id}/` – Update a comment (author only).
 - `DELETE /comments/{id}/` – Delete a comment (author only).
+- `GET /feed/` – Posts by users the caller follows, newest first.
 
 Include the token in requests that require authentication:
 ```
