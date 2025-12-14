@@ -1,16 +1,18 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from .models import User
 from .serializers import (
     LoginSerializer,
     ProfileSerializer,
     RegistrationSerializer,
     UserSerializer,
 )
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, permissions, status
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import User
+
+CustomUser = User
 
 
 class RegisterView(APIView):
@@ -74,22 +76,24 @@ class UserTokenView(APIView):
         return Response({'token': token.key})
 
 
-class FollowUserView(APIView):
+class FollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
-        target = get_object_or_404(User, id=user_id)
+        target = get_object_or_404(self.get_queryset(), id=user_id)
         if target == request.user:
             return Response({'detail': 'Cannot follow yourself.'}, status=status.HTTP_400_BAD_REQUEST)
         request.user.following.add(target)
         return Response({'detail': f'Now following {target.username}.'}, status=status.HTTP_200_OK)
 
 
-class UnfollowUserView(APIView):
+class UnfollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
-        target = get_object_or_404(User, id=user_id)
+        target = get_object_or_404(self.get_queryset(), id=user_id)
         if target == request.user:
             return Response({'detail': 'Cannot unfollow yourself.'}, status=status.HTTP_400_BAD_REQUEST)
         request.user.following.remove(target)
