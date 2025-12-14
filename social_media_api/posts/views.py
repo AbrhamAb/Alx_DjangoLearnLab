@@ -24,7 +24,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.select_related('post', 'author').all()
+    queryset = Comment.objects.all().select_related('post', 'author')
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
     filter_backends = [filters.OrderingFilter]
