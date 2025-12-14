@@ -29,8 +29,8 @@ class FeedView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        following_ids = user.following.values_list('id', flat=True)
-        return Post.objects.filter(author_id__in=following_ids).select_related('author').order_by('-created_at')
+        following_users = user.following.all()
+        return Post.objects.filter(author__in=following_users).select_related('author').order_by('-created_at')
 
 
 class CommentViewSet(viewsets.ModelViewSet):
