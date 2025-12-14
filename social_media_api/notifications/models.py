@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.utils import timezone
 
 
 class Notification(models.Model):
@@ -16,9 +17,10 @@ class Notification(models.Model):
     target = GenericForeignKey('content_type', 'object_id')
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-timestamp']
 
     def __str__(self) -> str:
         return f'{self.actor} {self.verb} -> {self.recipient}'

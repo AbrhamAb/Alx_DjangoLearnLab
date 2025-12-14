@@ -18,6 +18,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             'target_type',
             'object_id',
             'is_read',
+            'timestamp',
             'created_at',
         )
         read_only_fields = fields

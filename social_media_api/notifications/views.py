@@ -10,5 +10,5 @@ class NotificationListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Notification.objects.filter(recipient=self.request.user)
-        unread_first = queryset.order_by('is_read', '-created_at')
+        unread_first = queryset.order_by('is_read', '-timestamp')
         return unread_first
